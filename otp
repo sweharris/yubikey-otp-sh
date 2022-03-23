@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# This file is in the format
+#   ID base64API_key
+# These can be got for free from https://developers.yubico.com/OTP/
+
+set -- $(cat $HOME/.yubico_key)
+ID=$1
+KEY=$(echo "$2" | base64 -d)
+
+printf "Press the button on your key: "
+t=$(stty -g)
+stty -echo
+read otp
+stty $t
+
+# Indicate to the user that the code has been received
+echo "(+)"
+
+nonce=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 24)
+
+MSG=$(curl -s "https://api.yubico.com/wsapi/2.0/verify?nonce=$nonce&id=$ID&otp=$otp" | dos2unix)
+
+HMAC=$(
+   echo "$MSG" |\
+        grep -v '^h=' | sort | tr '\012' '&' | sed "s/&$//" |\
+        openssl dgst -sha1 -hmac $KEY -binary | base64 
+)
+
+cmp=$(echo "$MSG" | grep "^h=$HMAC\$")
+if [ -z "$cmp" ]
+then
+  echo HMAC failed. We calculated $HMAC
+  echo "$MSG"
+else
+  status=$(echo "$MSG" | sed -n 's/^status=//p')
+  if [ "$status" == "OK" ]
+  then
+    echo Good code.  Your ID is $(echo $otp | cut -c-12)
+  else
+    echo Bad status code: $status
+    echo "$MSG"
+  fi
+fi
