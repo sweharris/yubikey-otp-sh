@@ -25,7 +25,7 @@ The response looks something like
 
     h=bMZpcTlVe7RPCsGmbSiM40iLfj4=
     t=2022-03-22T15:05:26Z0823
-    otp=abcdefghijrthuhuitldienftdkdhhbntncldljtdlnj
+    otp=abcdefghijklhuhuitldienftdkdhhbntncldljtdlnj
     nonce=askjdnkajsndjkasndkjsnad
     sl=100
     status=OK
@@ -47,4 +47,21 @@ is an error.
 
 If all is good then the first 12 characters of the OTP string; these are
 unique to each key and will always be there in every key press.
+
+Example of a good request:
+
+    % ./otp
+    Press the button on your key: (+)
+    Good code. Your ID is abcdefghijkl
+
+Example of a replay (the same OTP code presented twice)
+
+    % ./otp
+    Press the button on your key: (+)
+    Bad status code: REPLAYED_OTP
+    h=aJvUXOsedgQcavf2HKaKgdUF5Ro=
+    t=2022-03-23T13:22:43Z0131
+    otp=abcdefghijklktbtbguhbffbcifgblregbkvhrugenlv
+    nonce=jndlVdKyC85wfL7EWQEavySs
+    status=REPLAYED_OTP
 
